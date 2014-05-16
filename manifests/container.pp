@@ -123,6 +123,7 @@ define lxc::container (
     onlyif  => [
       "lxc-info -n ${name} | grep -Ei '^state:\s+RUNNING$'",
       "test ${cpu_shares} != undef",
+      "test `lxc-cgroup -n ${name} cpu.shares` != ${cpu_shares}",
     ],
   }
   ->
@@ -131,7 +132,6 @@ define lxc::container (
     onlyif  => [
       "test -f ${lxc::params::container_dir}/${name}/config",
       "test ${ensure} = absent",
-      "test `lxc-cgroup -n ${name} cpu.shares` != ${cpu_shares}",
     ],
   }
 }
