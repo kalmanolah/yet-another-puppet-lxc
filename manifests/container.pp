@@ -87,6 +87,7 @@ define lxc::container (
     onlyif  => [
       "lxc-info -n ${name} | grep -Ei '^state:\s+RUNNING$'",
       "test ${mem_limit} != undef",
+      "test `lxc-cgroup -n ${name} memory.limit_in_bytes` != ${mem_limit}",
     ],
   }
   ->
@@ -95,6 +96,7 @@ define lxc::container (
     onlyif  => [
       "lxc-info -n ${name} | grep -Ei '^state:\s+RUNNING$'",
       "test ${mem_soft_limit} != undef",
+      "test `lxc-cgroup -n ${name} memory.soft_limit_in_bytes` != ${mem_soft_limit}",
     ],
   }
   ->
@@ -103,6 +105,7 @@ define lxc::container (
     onlyif  => [
       "lxc-info -n ${name} | grep -Ei '^state:\s+RUNNING$'",
       "test ${memsw_limit} != undef",
+      "test `lxc-cgroup -n ${name} memory.memsw.limit_in_bytes` != ${memsw_limit}",
     ],
   }
   ->
@@ -111,6 +114,7 @@ define lxc::container (
     onlyif  => [
       "lxc-info -n ${name} | grep -Ei '^state:\s+RUNNING$'",
       "test ${cpus} != undef",
+      "test `lxc-cgroup -n ${name} cpuset.cpus` != ${cpus}",
     ],
   }
   ->
@@ -127,6 +131,7 @@ define lxc::container (
     onlyif  => [
       "test -f ${lxc::params::container_dir}/${name}/config",
       "test ${ensure} = absent",
+      "test `lxc-cgroup -n ${name} cpu.shares` != ${cpu_shares}",
     ],
   }
 }
