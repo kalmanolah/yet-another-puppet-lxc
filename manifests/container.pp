@@ -14,6 +14,7 @@ define lxc::container (
   $cpu_shares     = $lxc::params::container_cpu_shares,
   $backingstore   = $lxc::params::container_backingstore,
   $autostart      = $lxc::params::container_autostart,
+  $group          = $lxc::params::container_group,
 ) {
   require lxc
   include lxc::params
@@ -25,20 +26,14 @@ define lxc::container (
   # Container autostart #
   #######################
 
-  $autostart_cfg_ensure = $autostart ? {
-    true  => 'link',
-    false => 'absent',
+  $autostart_value = $autostart ? {
+    true  => '1',
+    false => '0',
   }
 
-  $autostart_cfg_ensure_real = $ensure ? {
-    'absent' => 'absent',
-    default  => $autostart_cfg_ensure,
-  }
-
-  file { "/etc/lxc/auto/${name}.conf":
-    ensure  => $autostart_cfg_ensure_real,
-    target  => "${lxc::params::container_dir}/${name}/config",
-    require => File['/etc/lxc/auto'],
+  $group_ensure = $group ? {
+    undef   => 'absent',
+    default => 'present',
   }
 
 
@@ -133,5 +128,23 @@ define lxc::container (
       "test -f ${lxc::params::container_dir}/${name}/config",
       "test ${ensure} = absent",
     ],
+  }
+
+  # If the container is present, set some values
+  if $ensure != 'absent' {
+    file_line { "Set_container_${name}_autostart":
+      path   => "${lxc::params::container_dir}/${name}/config",
+      match  => '^lxc.start.auto = (1|0)$',
+      line   => "lxc.start.auto = ${autostart_value}",
+      before => Exec["Start_container_${name}"],
+    }
+
+    file_line { "Set_container_${name}_group":
+      ensure => $group_ensure,
+      path   => "${lxc::params::container_dir}/${name}/config",
+      match  => '^lxc.group = .*$',
+      line   => "lxc.group = ${group}",
+      before => Exec["Start_container_${name}"],
+    }
   }
 }

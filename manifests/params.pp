@@ -12,11 +12,12 @@ class lxc::params {
   $container_fssize         = '1G'
   $container_fstype         = 'ext4'
   $container_autostart      = true
+  $container_group          = undef
 
   # $container_mem_limit      = '1024M'
   # $container_memsw_limit    = '2048M'
   # $container_mem_soft_limit = '512M'
-  # $container_cpus           = range('0', $::processorcount)
+  # $container_cpus           = '0-7'
   # $container_cpu_shares     = '1024'
   $container_mem_limit      = undef
   $container_memsw_limit    = undef
