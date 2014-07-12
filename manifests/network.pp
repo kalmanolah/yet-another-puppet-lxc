@@ -2,13 +2,31 @@
 # Manages LXC network stuff #
 #############################
 class lxc::network {
-  # file { '/etc/resolvconf/resolv.conf.d/head':
-  #   content => template('lxc/resolvconf.erb'),
-  #   owner   => 'root',
-  #   group   => 'root',
-  #   mode    => '0644',
-  #   require => Package['resolvconf'],
-  # }
+  file_line { 'Set_lxc_dnsmasq_conf_file':
+    path   => '/etc/default/lxc-net',
+    match  => '^#*LXC_DHCP_CONFILE=.*$',
+    line   => 'LXC_DHCP_CONFILE=/etc/lxc/dnsmasq.conf',
+  }
+
+  file { '/etc/lxc/dnsmasq.conf':
+    content => template('lxc/conf/lxc_dnsmasq.conf'),
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+  }
+
+  concat { '/etc/lxc/dnsmasq.hosts':
+    ensure => 'present',
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0644',
+  }
+
+  concat::fragment { 'lxc_dnsmasq_initial_hosts':
+    target  => '/etc/lxc/dnsmasq.hosts',
+    content => "10.0.3.1 ${::fqdn} ${::hostname}",
+    order   => '01',
+  }
 
   # Optionally configure firewall
   if $lxc::configure_firewall {
