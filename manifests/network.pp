@@ -15,17 +15,12 @@ class lxc::network {
     mode    => '0644',
   }
 
-  concat { '/etc/lxc/dnsmasq.hosts':
-    ensure => 'present',
-    owner  => 'root',
-    group  => 'root',
-    mode   => '0644',
-  }
-
-  concat::fragment { 'lxc_dnsmasq_initial_hosts':
-    target  => '/etc/lxc/dnsmasq.hosts',
-    content => "10.0.3.1 ${::fqdn} ${::hostname}",
-    order   => '01',
+  file { '/etc/lxc/dnsmasq.hosts':
+    content => template('lxc/conf/lxc_dnsmasq.hosts'),
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+    replace => false,
   }
 
   # Optionally configure firewall
